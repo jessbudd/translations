@@ -1,5 +1,11 @@
 /googleapi
-/google-auth.json
+google-auth.json
+
+# test pages
+/pages
+/es 
+accessibility.md 
+home.html
 
 # Python caches and compiled files
 __pycache__/
