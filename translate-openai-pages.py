@@ -97,32 +97,36 @@ def process_file(input_path, output_dir):
 
 def process_files_in_directory(input_dir, output_dir):
     filenames = os.listdir(input_dir)
-    successful_translations = 0
+    successful_translations_count = 0
     error_count = 0
+    error_file_names = [] 
     total_cost = 0
 
     for filename in filenames:
-        try:
-            input_path = os.path.join(input_dir, filename)
+        if not filename.startswith('.'):  # Skip hidden files or files starting with .
+            try:
+                input_path = os.path.join(input_dir, filename)
 
-            if os.path.isfile(input_path):
-                output_path = os.path.join(output_dir, filename)
+                if os.path.isfile(input_path):
+                    output_path = os.path.join(output_dir, filename)
 
-                concatenated_content = concatenate_prompt_with_file_content(language, input_path)
-                response = translate_text(concatenated_content)
-                translated_text = response.choices[0].message.content.strip()
+                    concatenated_content = concatenate_prompt_with_file_content(language, input_path)
+                    response = translate_text(concatenated_content)
+                    translated_text = response.choices[0].message.content.strip()
 
-                write_output_to_file(translated_text, output_path)                
-                cost = getCostOfTranslation(response)
-                total_cost += cost
-                successful_translations += 1
-        except Exception as e:
-            print(f"Error processing file {filename}: {e}")
-            error_count += 1
+                    write_output_to_file(translated_text, output_path)                
+                    cost = getCostOfTranslation(response)
+                    total_cost += cost
+                    successful_translations_count += 1
+            except Exception as e:
+                print(f"Error processing file {filename}: {e}")
+                error_file_names.append(filename)
+                error_count += 1
 
-    print(f"Total number of files written: {successful_translations}")
+    print(f"Total cost of translations in USD: ${round(total_cost, 4)}")
+    print(f"Total number of files written: {successful_translations_count}")
     print(f"Total number of errors: {error_count}")
-    print(f"Total cost of tokens in USD: ${round(total_cost, 4)}")
+    print(f"Files with errors: {error_file_names}")
 
 def process_input(input_path, output_dir):
     if os.path.isfile(input_path):
