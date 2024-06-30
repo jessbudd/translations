@@ -35,47 +35,13 @@ client = OpenAI(
 )
 
 def concatenate_prompt_with_file_content(language, file_path):
-    prompt = f"The following document is a page from a website written in the english language. It may be written in html or in markdown. Please translate the page from english into the language with an ISO language code of {language}, while keeping all markup, html tags and attributes the same. Open Web Advocacy, hashtags and social media platform names should not be translated. The permalink should remain in English, but with the language code in front. For example ‘/‘ would become ‘/es/‘. The title and metaDesc properties in the front matter should be translated."
+    prompt = f"The following document is a page from a website written in the english language. It may be written in html or in markdown. Please translate the page from english into the language with an ISO language code of {language}, while keeping all markup, html tags and attributes the same. Open Web Advocacy, hashtags and social media platform names should not be translated. The permalinks should remain in English, but with the language code in front. For example ‘/‘ would become ‘/es/‘. The title and metaDesc properties in the front matter should be translated."
 
     with open(file_path, 'r', encoding='utf-8') as file:
         file_content = file.read()
 
     logging.info('CONCATENATED_PROMPT ' + prompt + file_content)
     return prompt + file_content
-
-# This code is for testing without making actual API calls
-# comment in and out as needed
-# class ObjectView(object):
-#     def __init__(self, d):
-#         for k, v in d.items():
-#             if isinstance(v, dict):
-#                 d[k] = ObjectView(v)
-#             elif isinstance(v, list):
-#                 for i in range(len(v)):
-#                     if isinstance(v[i], dict):
-#                         v[i] = ObjectView(v[i])
-#         self.__dict__ = d
-
-# dummy = {
-#   "choices": [
-#     {
-#       "finish_reason": "length",
-#       "index": 0,
-#       "logprobs": 'null',
-#       "text": "\n\n\"Let Your Sweet Tooth Run Wild at Our Creamy Ice Cream Shack"
-#     }
-#   ],
-#   "created": 1683130927,
-#   "id": "cmpl-7C9Wxi9Du4j1lQjdjhxBlO22M61LD",
-#   "model": "gpt-3.5-turbo-instruct",
-#   "object": "text_completion",
-#   "usage": {
-#     "completion_tokens": 16,
-#     "prompt_tokens": 10,
-#     "total_tokens": 2600
-#   }
-# }
-# dummyResponse = ObjectView(dummy)
 
 def translate_text(text):
     start_time = time.time()
@@ -97,8 +63,6 @@ def translate_text(text):
     logging.info('RESPONSE ' + str(response))
     logging.info('RESPONSE MESSAGE ' + response.choices[0].message.content.strip())
     return response
-
-    # return dummyResponse
 
 def write_output_to_file(translated_text, file_path):
     directory = os.path.dirname(file_path)
@@ -146,7 +110,7 @@ def process_files_in_directory(input_dir, output_dir):
 
                 concatenated_content = concatenate_prompt_with_file_content(language, input_path)
                 response = translate_text(concatenated_content)
-                translated_text = response.choices[0].text.strip()
+                translated_text = response.choices[0].message.content.strip()
 
                 write_output_to_file(translated_text, output_path)                
                 cost = getCostOfTranslation(response)
