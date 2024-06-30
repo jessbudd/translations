@@ -1,18 +1,26 @@
-# this file uses legacy chat completions api
-# it is limited to 4,096 tokens which means longer files
-# fail and throw an error, but it is cheaper to run
-
 import os
 import sys
+import logging
+import time
 from openai import OpenAI
 from dotenv import load_dotenv
-
-load_dotenv()
 
 # Usage
 # python translate-openai.py <language code> <input file or folder name>
 # example: python translate-openai.py es pages
 # example: python translate-openai.py ar home.html
+# 
+# Notes
+# this gpt model has a limit of 4,096 output tokens
+# files larger than this will fail and need to be translated 
+# manually via the openAI playground
+
+MODEL = 'gpt-3.5-turbo'
+
+# Set up logging
+logging.basicConfig(filename='app.log', filemode='a', format='%(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+
+load_dotenv()
 
 if len(sys.argv) < 3:
     raise Exception('You must provide the language ISO code and input path as arguments')
@@ -27,10 +35,12 @@ client = OpenAI(
 )
 
 def concatenate_prompt_with_file_content(language, file_path):
-    prompt = f"The following document is a page from a website written in the english language. It may be written in html or in markdown. Your job is to translate the page from english into the language with an ISO language code of {language}, while keeping all markup, html tags and attributes the same. Open Web Advocacy, hashtags and social media platform names should not be translated. The title and metaDesc properties in the front matter should be translated. The permalink should remain in English, but with the language code in front. For example ‘/‘ would become ‘/es/‘."
+    prompt = f"The following document is a page from a website written in the english language. It may be written in html or in markdown. Please translate the page from english into the language with an ISO language code of {language}, while keeping all markup, html tags and attributes the same. Open Web Advocacy, hashtags and social media platform names should not be translated. The permalink should remain in English, but with the language code in front. For example ‘/‘ would become ‘/es/‘. The title and metaDesc properties in the front matter should be translated."
 
     with open(file_path, 'r', encoding='utf-8') as file:
         file_content = file.read()
+
+    logging.info('CONCATENATED_PROMPT ' + prompt + file_content)
     return prompt + file_content
 
 # This code is for testing without making actual API calls
@@ -68,14 +78,24 @@ def concatenate_prompt_with_file_content(language, file_path):
 # dummyResponse = ObjectView(dummy)
 
 def translate_text(text):
-    response = client.completions.create(model="gpt-3.5-turbo-instruct",
-    prompt=text,
-    max_tokens=2500,
-    stop=None,
-    temperature=0.1,
-    top_p=1.0,
-    frequency_penalty=0.0,
-    presence_penalty=0.0)
+    start_time = time.time()
+    response = client.chat.completions.create(model=MODEL,
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant that translates English files into other languages for use on a static website."},
+            {"role": "user", "content": text}
+        ],
+        max_tokens=4000,
+        stop=None,
+        temperature=0.1,
+        frequency_penalty=0.0,
+        presence_penalty=0.0)
+    
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+
+    print(f"The OpenAI translation request took {round(elapsed_time, 2)} seconds.") 
+    logging.info('RESPONSE ' + str(response))
+    logging.info('RESPONSE MESSAGE ' + response.choices[0].message.content.strip())
     return response
 
     # return dummyResponse
@@ -104,12 +124,7 @@ def process_file(input_path, output_dir):
 
     concatenated_content = concatenate_prompt_with_file_content(language, input_path)
     response = translate_text(concatenated_content)
-    translated_text = response.choices[0].text.strip()
-
-    print(f"#### concatenated_content: {concatenated_content}")
-
-    print(f"##### response: {response}")
-    print(f"#### Translated text: {translated_text}")
+    translated_text = response.choices[0].message.content.strip()
 
     write_output_to_file(translated_text, output_path)
     getCostOfTranslation(response)

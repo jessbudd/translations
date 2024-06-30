@@ -3,9 +3,15 @@ google-auth.json
 
 # test pages
 /pages
+/pages/*
 /es 
+/es-backup
+/es/* 
 accessibility.md 
+privacy.md
 home.html
+languages.json
+navigation.json
 
 # Python caches and compiled files
 __pycache__/
@@ -100,3 +106,4 @@ Thumbs.db
 *.pem
 *.key
 *.env
+*.log
