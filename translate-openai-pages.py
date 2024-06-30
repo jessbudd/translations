@@ -1,3 +1,7 @@
+# this file uses legacy chat completions api
+# it is limited to 4,096 tokens which means longer files
+# fail and throw an error, but it is cheaper to run
+
 import os
 import sys
 from openai import OpenAI
@@ -23,7 +27,7 @@ client = OpenAI(
 )
 
 def concatenate_prompt_with_file_content(language, file_path):
-    prompt = f"The following document is a page from a website written in the english language. It may be written in html or in markdown. Your job is to translate the page from english into the language with an ISO language code of {language}, while keeping all markup, html tags and attributes the same. The text between the — characters is the front matter. The title and metaDesc properties should be translated. The permalink should remain in English, but with the language code in front. For example ‘/‘ would become ‘/es/‘."
+    prompt = f"The following document is a page from a website written in the english language. It may be written in html or in markdown. Your job is to translate the page from english into the language with an ISO language code of {language}, while keeping all markup, html tags and attributes the same. Open Web Advocacy, hashtags and social media platform names should not be translated. The title and metaDesc properties in the front matter should be translated. The permalink should remain in English, but with the language code in front. For example ‘/‘ would become ‘/es/‘."
 
     with open(file_path, 'r', encoding='utf-8') as file:
         file_content = file.read()
@@ -66,6 +70,7 @@ def concatenate_prompt_with_file_content(language, file_path):
 def translate_text(text):
     response = client.completions.create(model="gpt-3.5-turbo-instruct",
     prompt=text,
+    max_tokens=2500,
     stop=None,
     temperature=0.1,
     top_p=1.0,
@@ -100,6 +105,11 @@ def process_file(input_path, output_dir):
     concatenated_content = concatenate_prompt_with_file_content(language, input_path)
     response = translate_text(concatenated_content)
     translated_text = response.choices[0].text.strip()
+
+    print(f"#### concatenated_content: {concatenated_content}")
+
+    print(f"##### response: {response}")
+    print(f"#### Translated text: {translated_text}")
 
     write_output_to_file(translated_text, output_path)
     getCostOfTranslation(response)
