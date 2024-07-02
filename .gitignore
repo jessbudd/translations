@@ -7,7 +7,7 @@
 accessibility.md 
 privacy.md
 home.html
-languages.json
+languages_base.json
 navigation.json
 
 # Python caches and compiled files
