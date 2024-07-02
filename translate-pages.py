@@ -38,7 +38,7 @@ client = OpenAI(
 )
 
 def concatenate_prompt_with_file_content(language, file_path):
-    prompt = f"The following document is a page from a website written in the english language. It may be written in html or in markdown. Please translate the page from english into the language with an ISO language code of {language}, while keeping all markup, html tags and attributes the same. Open Web Advocacy, OWA, hashtags and platform names should not be translated. The permalinks should remain in English, but with the language code in front. For example ‘/‘ would become ‘/es/‘. The title and metaDesc properties in the front matter should be translated Please be mindful of using correct accents and consistent male gender if it applies to the given language."
+    prompt = f"The following document is a page from a website written in the english language. It may be written in html or in markdown. Please translate the page from english into the language with an ISO language code of {language}, while keeping all markup, html tags and attributes the same. Open Web Advocacy, OWA, hashtags and platform names should not be translated. The permalinks should remain in English, but with the language code in front. For example ‘/‘ would become ‘/es/‘. The title and metaDesc properties in the front matter should be translated Please be mindful of using correct accents and consistent masculine gender if it applies to the given language."
 
     with open(file_path, 'r', encoding='utf-8') as file:
         file_content = file.read()
