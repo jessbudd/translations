@@ -33,12 +33,12 @@ python translate-pages.py <language code> <input file or folder name>
 For example, to translate a directory named "pages" into Spanish, you would run:
 
 ```
-python translate-openai.py es pages
+python translate-pages.py es pages
 ```
 
 To translate a single file named "home.html" into Arabic, you would run:
 ```
-python translate-openai.py ar home.html
+python translate-pages.py ar home.html
 ```
 
 ## Notes

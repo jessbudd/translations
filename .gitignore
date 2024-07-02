@@ -1,6 +1,3 @@
-/googleapi
-google-auth.json
-
 # test pages
 /pages
 /pages/*
@@ -87,6 +84,7 @@ dmypy.json
 # Virtual environment
 venv/
 ENV/
+/googleapi
 
 # Spyder project settings
 .spyderproject

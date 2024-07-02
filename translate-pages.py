@@ -6,14 +6,14 @@ from openai import OpenAI
 from dotenv import load_dotenv
 
 # Usage
-# python translate-openai.py <language code> <input file or folder name>
-# example: python translate-openai.py es pages
-# example: python translate-openai.py ar home.html
+# python translate-pages.py <language code> <input file or folder name>
+# example: python translate-pages.py es pages
+# example: python translate-pages.py ar home.html
 # 
 # Notes
 # this gpt model has a limit of 4,096 output tokens
 # files larger than this will fail and need to be translated 
-# manually via the openAI playground
+# manually via the Open AI playground
 
 MODEL = 'gpt-3.5-turbo'
 
