@@ -24,6 +24,9 @@ OPEN_API_ORGANISATION_ID="your-org-id"
 OPEN_API_PROJECT_ID="your-proj-id"
 
 ```
+
+### Pages
+
 You can use this script to translate a single file or a directory of files. 
 
 ```
@@ -39,6 +42,19 @@ python translate-pages.py es pages
 To translate a single file named "home.html" into Arabic, you would run:
 ```
 python translate-pages.py ar home.html
+```
+
+
+### Global JSON content
+
+To translate the languages_base file for global content into Spanish, you would run:
+```
+python translate-base.py es languages_base.json
+```
+
+To translate the navigation file into Arabic, you would run:
+```
+python translate-base.py ar navigation.json
 ```
 
 ## Notes

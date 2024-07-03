@@ -19,7 +19,7 @@ from dotenv import load_dotenv
 
 MODEL = 'gpt-3.5-turbo'
 PROMPTS = {
-    'languages_base.json': "The following JSON has a set of objects where the key is a language code. One of these keys is 'en' for English. The English object contains a number of properties with English text values. Please add a new {language} object where the properties are exactly the same as the English object however the values of those properties are translated to the language with an ISO language code of {language}. For example `'asideHeading': 'Recent updates'` becomes `'asideHeading': 'Noticias recientes'` in Spanish. Open Web Advocacy, OWA, hashtags and platform names should not be translated. Please be mindful of using correct accents and consistent masculine gender if it applies to the language. Any languages that already exist should be retained.",
+    'languages_base.json': "The following JSON has a set of objects where the key is a language code. One of these keys is 'en' for English. The English object contains a number of properties with English text values. Please add a new {language} object where the properties are exactly the same as the English object, however the values of those properties are translated to the language with an ISO language code of {language}. For example `'asideHeading': 'Recent updates'` becomes `'asideHeading': 'Noticias recientes'` in Spanish. Open Web Advocacy, OWA, hashtags and platform names should not be translated. Please be mindful of using correct accents and consistent masculine gender if it applies to the language. Any languages that already exist should be retained.",
     
     
     'navigation.json': "The following JSON has a set of objects where the key is a language code. One of these keys is 'en' for English. The English object contains two objects; 'primary' and 'secondary'. These objects contain an array of navigation links with a 'text' property and a 'url' property. Please add a new {language} object which is a duplicate of the english object. Translate the 'text' properties only to the language of language code {language}. Open Web Advocacy, OWA, hashtags and platform names should not be translated. Please be mindful of using correct accents and consistent masculine gender if it applies to the language. Any languages that already exist should be retained.",
@@ -61,7 +61,7 @@ def translate_text(text):
         ],
         max_tokens=4000,
         stop=None,
-        temperature=0.1,
+        temperature=0.0,
         frequency_penalty=0.0,
         presence_penalty=0.0)
     
