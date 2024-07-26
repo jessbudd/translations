@@ -18,7 +18,7 @@ from dotenv import load_dotenv
 # files larger than this will fail and need to be translated 
 # manually via the Open AI playground
 
-MODEL = 'gpt-3.5-turbo'
+MODEL = 'gpt-4o-mini'
 
 # Set up logging
 logging.basicConfig(filename='app.log', filemode='a', format='%(name)s - %(levelname)s - %(message)s', level=logging.INFO)

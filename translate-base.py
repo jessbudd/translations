@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 # files larger than this will fail and need to be translated 
 # manually via the openAI playground
 
-MODEL = 'gpt-3.5-turbo'
+MODEL = 'gpt-4o-mini'
 PROMPTS = {
     'languages_base.json': "The following JSON has a set of objects where the key is a language code. One of these keys is 'en' for English. The English object contains a number of properties with English text values. Please add a new {language} object where the properties are exactly the same as the English object, however the values of those properties are translated to the language with an ISO language code of {language}. For example `'asideHeading': 'Recent updates'` becomes `'asideHeading': 'Noticias recientes'` in Spanish. Open Web Advocacy, OWA, hashtags and platform names should not be translated. Please be mindful of using correct accents and consistent masculine gender if it applies to the language. Any languages that already exist should be retained.",
     
