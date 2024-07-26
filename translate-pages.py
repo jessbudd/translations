@@ -31,6 +31,30 @@ if len(sys.argv) < 3:
 language = sys.argv[1]
 input_path = sys.argv[2]
 
+project_id = os.getenv('GOOGLE_CLOUD_PROJECT_ID')
+
+def translate_page_content(content):
+    client = translate.TranslationServiceClient()
+    location = "global"
+    parent = f"projects/{project_id}/locations/{location}"
+    response = client.translate_text(
+        request={
+            "parent": parent,
+            "contents": [content],
+            "mime_type": "text/plain",
+            "source_language_code": "en-US",
+            "target_language_code": "es",
+        }
+    )
+
+    # Extract the translated text from each translation result
+    translated_texts = [translation.translated_text for translation in response.translations]
+
+    # Join the translated texts into a single string, separated by spaces
+    translated_text = ' '.join(translated_texts)
+
+    return translated_text
+
 client = OpenAI(
   organization=os.getenv('OPEN_API_ORGANISATION_ID'),
   project= os.getenv('OPEN_API_PROJECT_ID'),
@@ -86,56 +110,76 @@ def getCostOfTranslation(response):
     print(f"{response.usage.total_tokens} total tokens used at a cost of ${round(total_cost, 4)} USD")
     return total_cost
 
+def separate_front_mattter_from_content(input_path):
+    with open(input_path, 'r') as file:
+        content = file.read()
+
+    split_content = content.split('---')
+    if len(split_content) < 3:
+        raise ValueError("File content does not have expected format")
+
+    metadata = '---\n' + split_content[1].strip() + '\n---\n'  
+    main_content = '\n\n' + split_content[2].strip()
+
+    return metadata, main_content
+
 def process_file(input_path, output_dir):
     output_path = os.path.join(output_dir, os.path.basename(input_path))
+    
+    front_matter, page_content = separate_front_mattter_from_content(input_path)
 
-    concatenated_content = concatenate_prompt_with_file_content(language, input_path)
-    response = translate_text(concatenated_content)
-    translated_text = response.choices[0].message.content.strip()
+    # translate the front matter with OpenAI
+    prompt = build_prompt(language, front_matter)
+    response = translate_front_matter(prompt)
+    translated_front_matter = response.choices[0].message.content.strip()
 
-    write_output_to_file(translated_text, output_path)
+    # translate the main page content with Google Translate
+    translated_page_content = translate_page_content(page_content)
+    concatenated_content = translated_front_matter + translated_page_content
+
+    write_output_to_file(concatenated_content, output_path)
     getCostOfTranslation(response)
     print(f"Translated file {input_path} and wrote output to {output_path}")
 
 
-def process_files_in_directory(input_dir, output_dir):
-    filenames = os.listdir(input_dir)
-    successful_translations_count = 0
-    error_count = 0
-    error_file_names = [] 
-    total_cost = 0
+# def process_files_in_directory(input_dir, output_dir):
+    # filenames = os.listdir(input_dir)
+    # successful_translations_count = 0
+    # error_count = 0
+    # error_file_names = [] 
+    # total_cost = 0
 
-    for filename in filenames:
-        if not filename.startswith('.'):  # Skip hidden files or files starting with .
-            try:
-                input_path = os.path.join(input_dir, filename)
+    # for filename in filenames:
+    #     if not filename.startswith('.'):  # Skip hidden files or files starting with .
+    #         try:
+    #             input_path = os.path.join(input_dir, filename)
 
-                if os.path.isfile(input_path):
-                    output_path = os.path.join(output_dir, filename)
+    #             if os.path.isfile(input_path):
+    #                 output_path = os.path.join(output_dir, filename)
 
-                    concatenated_content = concatenate_prompt_with_file_content(language, input_path)
-                    response = translate_text(concatenated_content)
-                    translated_text = response.choices[0].message.content.strip()
+    #                 concatenated_content = concatenate_prompt_with_file_content(language, input_path)
+    #                 response = translate_text(concatenated_content)
+    #                 translated_text = response.choices[0].message.content.strip()
 
-                    write_output_to_file(translated_text, output_path)                
-                    cost = getCostOfTranslation(response)
-                    total_cost += cost
-                    successful_translations_count += 1
-            except Exception as e:
-                print(f"Error processing file {filename}: {e}")
-                error_file_names.append(filename)
-                error_count += 1
+    #                 write_output_to_file(translated_text, output_path)                
+    #                 cost = getCostOfTranslation(response)
+    #                 total_cost += cost
+    #                 successful_translations_count += 1
+    #         except Exception as e:
+    #             print(f"Error processing file {filename}: {e}")
+    #             error_file_names.append(filename)
+    #             error_count += 1
 
-    print(f"Total cost of translations in USD: ${round(total_cost, 4)}")
-    print(f"Total number of files written: {successful_translations_count}")
-    print(f"Total number of errors: {error_count}")
-    print(f"Files with errors: {error_file_names}")
+    # print(f"Total cost of translations in USD: ${round(total_cost, 4)}")
+    # print(f"Total number of files written: {successful_translations_count}")
+    # print(f"Total number of errors: {error_count}")
+    # print(f"Files with errors: {error_file_names}")
 
 def process_input(input_path, output_dir):
     if os.path.isfile(input_path):
         process_file(input_path, output_dir)
-    elif os.path.isdir(input_path):
-        process_files_in_directory(input_path, output_dir)
+    # elif os.path.isdir(input_path):
+    #     process_files_in_directory(input_path, output_dir)
     else:
         raise Exception(f'Invalid path: {input_path}')
     
