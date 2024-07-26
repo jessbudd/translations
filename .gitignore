@@ -101,6 +101,7 @@ ENV/
 Thumbs.db
 
 # Files containing sensitive information
+google-auth.json
 *.pem
 *.key
 *.env
